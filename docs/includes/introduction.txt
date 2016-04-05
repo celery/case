@@ -1,0 +1,8 @@
+:Version: 1.0.0
+:Web: http://case.readthedocs.org/
+:Download: http://pypi.python.org/pypi/case/
+:Source: http://github.com/celery/case/
+:Keywords: testing utilities, python, unittest, mock
+
+About
+=====

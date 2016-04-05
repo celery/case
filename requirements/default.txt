@@ -1,0 +1,3 @@
+six
+setuptools>=0.7
+-r deps/nose.txt
