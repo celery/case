@@ -1,9 +1,19 @@
 Changes
 =======
 
+.. _version-1.0.1:
+
+1.0.1
+=====
+:release-date: 2016-04-05 04:00 P.M PDT
+
+- Fixed issues with Python 3
+
 .. _version-1.0.0:
 
 1.0.0
 =====
-:release-date: TBA
-:release-by:
+:release-date: 2016-04-05 02:00 P.M PDT
+:release-by: Ask Solem
+
+- Initial release

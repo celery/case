@@ -50,10 +50,10 @@ $(README):
 readme: readmeclean $(README) readmecheck
 
 test:
-	(cd testproj; python manage.py test -x)
+	nosetests -x
 
 cov:
-	(cd testproj; python manage.py -x --with-coverage --cover-html --cover-branch)
+	nosetests -x --with-coverage --cover-html --cover-branch
 
 removepyc:
 	-find . -type f -a \( -name "*.pyc" -o -name "*$$py.class" \) | xargs rm
