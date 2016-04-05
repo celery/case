@@ -129,14 +129,14 @@ unless_darwin = partial(unless_platform, 'darwin', name='OS X')
 
 
 @decorator
-def if_pypy():
+def if_pypy(reason='does not work on PyPy'):
     if getattr(sys, 'pypy_version_info', None):
-        raise SkipTest('does not work on PyPy')
+        raise SkipTest(reason)
     yield
 
 
 @decorator
-def unless_pypy():
+def unless_pypy(reason='only applicable for PyPy'):
     if not hasattr(sys, 'pypy_version_info'):
-        raise SkipTest('only applicable on PyPy')
+        raise SkipTest(reason)
     yield
