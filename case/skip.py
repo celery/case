@@ -29,7 +29,7 @@ __all__ = [
 def if_python_version_before(*version, **kwargs):
     if sys.version_info < version:
         raise SkipTest('python >= {0}: {1}'.format(
-            '.'.join(version), kwargs.get('reason') or 'incompatible'))
+            '.'.join(map(str, version)), kwargs.get('reason') or 'incompatible'))
     yield
 
 
@@ -37,7 +37,7 @@ def if_python_version_before(*version, **kwargs):
 def if_python_version_after(*version, **kwargs):
     if sys.version_info >= version:
         raise SkipTest('python >= {0}: {1}'.format(
-            '.'.join(version), kwargs.get('reason') or 'incompatible'))
+            '.'.join(map(str, version)), kwargs.get('reason') or 'incompatible'))
     yield
 if_python3 = partial(if_python_version_after, 3)
 unless_python3 = partial(if_python_version_before, 3)

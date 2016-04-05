@@ -20,7 +20,7 @@ try:
 except ImportError:
     import mock  # noqa
 
-PY3 = sys.version_info[0] > 3
+PY3 = sys.version_info[0] >= 3
 if PY3:
     open_fqdn = 'builtins.open'
     module_name_t = str
@@ -116,9 +116,19 @@ def _bind(f, o):
 if PY3:  # pragma: no cover
     def _get_class_fun(meth):
         return meth
+
+    def module_name(s):
+        if isinstance(s, bytes):
+            return s.decode()
+        return s
 else:
-    def _get_class_fun(meth):
+    def _get_class_fun(meth):  # noqa
         return meth.__func__
+
+    def module_name(s):  # noqa
+        if isinstance(s, unicode):
+            return s.encode()
+        return s
 
 
 class MockCallbacks(object):
@@ -276,7 +286,7 @@ def patch_modules(*modules):
     prev = {}
     for mod in modules:
         prev[mod] = sys.modules.get(mod)
-        sys.modules[mod] = types.ModuleType(module_name_t(mod))
+        sys.modules[mod] = types.ModuleType(module_name(mod))
     try:
         yield
     finally:
@@ -303,7 +313,7 @@ def module(*names):
             prev[name] = sys.modules[name]
         except KeyError:
             pass
-        mod = sys.modules[name] = MockModule(module_name_t(name))
+        mod = sys.modules[name] = MockModule(module_name(name))
         mods.append(mod)
     try:
         yield mods
@@ -367,7 +377,7 @@ def module_exists(*modules):
     old_modules = []
     for module in modules:
         if isinstance(module, string_types):
-            module = types.ModuleType(module_name_t(module))
+            module = types.ModuleType(module_name(module))
         gen.append(module)
         if module.__name__ in sys.modules:
             old_modules.append(sys.modules[module.__name__])
