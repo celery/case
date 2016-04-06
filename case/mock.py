@@ -35,13 +35,20 @@ __all__ = [
     'wrap_logger', 'environ', 'sleepdeprived', 'mask_modules',
     'stdouts', 'replace_module_value', 'sys_version', 'pypy_version',
     'platform_pyimp', 'sys_platform', 'reset_modules', 'module',
-    'open', 'restore_logging', 'module_exists',
+    'open', 'restore_logging', 'module_exists', 'create_patcher',
 ]
 
 ANY = mock.ANY
 call = mock.call
 patch = mock.patch
 sentinel = mock.sentinel
+
+
+def create_patcher(*partial_path):
+
+    def patcher(name, **kwargs):
+        return patch(".".join(partial_path + (name, )), **kwargs)
+    return patcher
 
 
 class MockMixin(object):
