@@ -7,5 +7,6 @@
 .. currentmodule:: case.case
 
 .. automodule:: case.case
-    :members:
-    :undoc-members:
+
+    .. autoclass:: CaseMixin
+    .. autoclass:: Case

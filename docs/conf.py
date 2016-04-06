@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, print_function
 
-import sys
 import os
+import sys
 
 this = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,12 +11,13 @@ this = os.path.dirname(os.path.abspath(__file__))
 # absolute, like shown here.
 sys.path.append(os.path.join(os.pardir))
 sys.path.append(os.path.join(this, '_ext'))
-import case
+import case  # noqa
 
 # General configuration
 # ---------------------
 
 extensions = [
+    'autodocargspec',
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.pngmath',

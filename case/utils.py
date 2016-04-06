@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import functools
 import importlib
 import inspect
 import io
@@ -7,7 +8,6 @@ import logging
 import sys
 
 from contextlib import contextmanager
-from functools import wraps
 from six import reraise, string_types
 
 __all__ = [
@@ -18,6 +18,19 @@ __all__ = [
 StringIO = io.StringIO
 _SIO_write = StringIO.write
 _SIO_init = StringIO.__init__
+
+
+def update_wrapper(wrapper, wrapped, *args, **kwargs):
+    wrapper = functools.update_wrapper(wrapper, wrapped, *args, **kwargs)
+    wrapper.__wrapped__ = wrapped
+    return wrapper
+
+
+def wraps(wrapped,
+          assigned=functools.WRAPPER_ASSIGNMENTS,
+          updated=functools.WRAPPER_UPDATES):
+    return functools.partial(update_wrapper, wrapped=wrapped,
+                             assigned=assigned, updated=updated)
 
 
 class _CallableContext(object):
@@ -93,6 +106,7 @@ def decorator(predicate):
             fun, pargs = pargs[0], ()
             return decorator(fun)
         return _CallableContext(context, pargs, pkwargs, decorator)
+    assert take_arguments.__wrapped__
     return take_arguments
 
 

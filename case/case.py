@@ -114,14 +114,33 @@ class _AssertWarnsContext(_AssertRaisesBaseContext):
 
 
 class CaseMixin(object):
+    """Mixin class that adds the utility methods to any unittest TestCase
+    class."""
 
     def patch(self, *path, **options):
+        """Patch object until test case returns.
+
+        Example::
+
+            from case import Case
+
+            class test_Frobulator(Case):
+
+                def setup(self):
+                    frobulate = self.patch('some.where.Frobulator.frobulate')
+
+        """
         manager = mock.patch('.'.join(path), **options)
         patched = manager.start()
         self.addCleanup(manager.stop)
         return patched
 
     def mock_modules(self, *mods):
+        """Mock modules for the duration of the test.
+
+        See :func:`case.mock.module`
+
+        """
         modules = []
         for mod in mods:
             mod = mod.split('.')
@@ -131,25 +150,53 @@ class CaseMixin(object):
         modules = sorted(set(modules))
         return self.wrap_context(mock.module(*modules))
 
-    def on_nth_call_do(self, mock, side_effect, n=1):
-        return mock.on_nth_call_do(side_effect, n=n)
-
-    def on_nth_call_return(self, mock, retval, n=1):
-        return mock.on_nth_call_return(retval, n=n)
-
     def mask_modules(self, *modules):
+        """Make modules for the duration of the test.
+
+        See :func:`case.mock.mask_modules`.
+
+        """
         self.wrap_context(mock.mask_modules(*modules))
 
     def wrap_context(self, context):
+        """Wrap context so that the context exits when the test completes."""
         ret = context.__enter__()
         self.addCleanup(partial(context.__exit__, None, None, None))
         return ret
 
     def mock_environ(self, env_name, env_value):
+        """Mock environment variable value for the duration of the test.
+
+        See :func:`case.mock.environ`.
+
+        """
         return self.wrap_context(mock.environ(env_name, env_value))
 
 
 class Case(unittest.TestCase, CaseMixin):
+    """Test Case
+
+    Subclass of :class:`unittest.TestCase` adding convenience
+    methods.
+
+    **setup / teardown**
+
+    New :meth:`setup` and :meth:`teardown` methods can be defined
+    in addition to the core :meth:`setUp` + :meth:`tearDown`
+    methods.
+
+    Note: If you redefine the core :meth:`setUp` + :meth:`tearDown`
+          methods you must make sure ``super`` is called.
+          ``super`` is not necessary for the lowercase versions.
+
+    **Python 2.6 compatibility**
+
+    This class also implements :meth:`assertWarns`, :meth:`assertWarnsRegex`,
+    :meth:`assertDictContainsSubset`, and :meth:`assertItemsEqual`
+    which are not available in the original Python 2.6 unittest
+    implementation.
+
+    """
     DeprecationWarning = DeprecationWarning
     PendingDeprecationWarning = PendingDeprecationWarning
 

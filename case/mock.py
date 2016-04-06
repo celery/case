@@ -9,7 +9,7 @@ import time
 import types
 
 from contextlib import contextmanager
-from functools import partial, wraps
+from functools import wraps
 from six import reraise, string_types, iteritems as items
 from six.moves import builtins
 
@@ -33,9 +33,9 @@ __all__ = [
     'call', 'patch', 'sentinel',
 
     'wrap_logger', 'environ', 'sleepdeprived', 'mask_modules',
-    'stdouts', 'replace_module_value', 'pypy_version', 'platform_pyimp',
-    'sys_platform', 'reset_modules', 'patch_modules', 'module', 'open',
-    'restore_logging', 'module_exists',
+    'stdouts', 'replace_module_value', 'sys_version', 'pypy_version',
+    'platform_pyimp', 'sys_platform', 'reset_modules', 'module',
+    'open', 'restore_logging', 'module_exists',
 ]
 
 ANY = mock.ANY
@@ -47,7 +47,13 @@ sentinel = mock.sentinel
 class MockMixin(object):
 
     def on_nth_call_do(self, side_effect, n=1):
+        """Change Mock side effect after ``n`` calls.
 
+        Example::
+
+            mock.on_nth_call_do(RuntimeError, n=3)
+
+        """
         def on_call(*args, **kwargs):
             if self.call_count >= n:
                 self.side_effect = side_effect
@@ -56,6 +62,13 @@ class MockMixin(object):
         return self
 
     def on_nth_call_return(self, retval, n=1):
+        """Change Mock to return specific return value after ``n`` calls.
+
+        Example::
+
+            mock.on_nth_call_return('STOP', n=3)
+
+        """
 
         def on_call(*args, **kwargs):
             if self.call_count >= n:
@@ -96,6 +109,7 @@ class _ContextMock(Mock):
 
 
 def ContextMock(*args, **kwargs):
+    """Mock that mocks :keyword:`with` statement contexts."""
     obj = _ContextMock(*args, **kwargs)
     obj.attach_mock(_ContextMock(), '__enter__')
     obj.attach_mock(_ContextMock(), '__exit__')
@@ -147,6 +161,17 @@ class MockCallbacks(object):
 
 @decorator
 def wrap_logger(logger, loglevel=logging.ERROR):
+    """Wrap :class:`logging.Logger` with a StringIO() handler.
+
+    yields a StringIO handle.
+
+    Example::
+
+        with mock.wrap_logger(logger, loglevel=logging.DEBUG) as sio:
+            ...
+            sio.getvalue()
+
+    """
     old_handlers = get_logger_handlers(logger)
     sio = WhateverIO()
     siohandler = logging.StreamHandler(sio)
@@ -160,6 +185,15 @@ def wrap_logger(logger, loglevel=logging.ERROR):
 
 @decorator
 def environ(env_name, env_value):
+    """Mock environment variable value.
+
+    Example::
+
+        @mock.environ('DJANGO_SETTINGS_MODULE', 'proj.settings')
+        def test_other_settings(self):
+            ...
+
+    """
     sentinel = object()
     prev_val = os.environ.get(env_name, sentinel)
     os.environ[env_name] = env_value
@@ -174,6 +208,14 @@ def environ(env_name, env_value):
 
 @decorator
 def sleepdeprived(module=time):
+    """Mock time.sleep to do nothing.
+
+    Example::
+
+        @mock.sleepdeprived()  # < patches time.sleep
+        @mock.sleepdeprived(celery.result)  # < patches celery.result.sleep
+
+    """
     old_sleep, module.sleep = module.sleep, noop
     try:
         yield
@@ -187,7 +229,7 @@ def sleepdeprived(module=time):
 def mask_modules(*modnames):
     """Ban some modules from being importable inside the context
 
-    For example:
+    For example::
 
         >>> with mask_modules('sys'):
         ...     try:
@@ -199,6 +241,12 @@ def mask_modules(*modnames):
         >>> import sys  # noqa
         >>> sys.version
         (2, 5, 2, 'final', 0)
+
+    Or as a decorator::
+
+        @mask_modules('sys')
+        def test_foo(self):
+            ...
 
     """
     realimport = builtins.__import__
@@ -218,7 +266,23 @@ def mask_modules(*modnames):
 
 @decorator
 def stdouts():
-    """Override `sys.stdout` and `sys.stderr` with `WhateverIO`."""
+    """Override `sys.stdout` and `sys.stderr` with `StringIO`
+    instances.
+
+    Decorator example::
+
+        @mock.stdouts
+        def test_foo(self, stdout, stderr):
+            something()
+            self.assertIn('foo', stdout.getvalue())
+
+    Context example::
+
+        with mock.stdouts() as (stdout, stderr):
+            something()
+            self.assertIn('foo', stdout.getvalue())
+
+    """
     prev_out, prev_err = sys.stdout, sys.stderr
     prev_rout, prev_rerr = sys.__stdout__, sys.__stderr__
     mystdout, mystderr = WhateverIO(), WhateverIO()
@@ -236,6 +300,20 @@ def stdouts():
 
 @decorator
 def replace_module_value(module, name, value=None):
+    """Mock module value, given a module, attribute name and value.
+
+    Decorator example::
+
+        @mock.replace_module_value(module, 'CONSTANT', 3.03)
+        def test_foo(self):
+            ...
+
+    Context example::
+
+        with mock.replace_module_value(module, 'CONSTANT', 3.03):
+            ...
+
+    """
     has_prev = hasattr(module, name)
     prev = getattr(module, name, None)
     if value:
@@ -255,16 +333,79 @@ def replace_module_value(module, name, value=None):
                 delattr(module, name)
             except AttributeError:
                 pass
-pypy_version = partial(
-    replace_module_value, sys, 'pypy_version_info',
-)
-platform_pyimp = partial(
-    replace_module_value, platform, 'python_implementation',
-)
+
+
+def sys_version(value):
+    """Mock :data:`sys.version_info`
+
+    Decorator example::
+
+        @mock.sys_version((3, 6, 1))
+        def test_foo(self):
+            ...
+
+    Context example::
+
+        with mock.sys_version((3, 6, 1)):
+            ...
+
+    """
+    return replace_module_value(sys, 'version_info', value)
+
+
+def pypy_version(value):
+    """Mock :data:`sys.pypy_version_info`
+
+    Decorator example::
+
+        @mock.pypy_version((3, 6, 1))
+        def test_foo(self):
+            ...
+
+    Context example::
+
+        with mock.pypy_version((3, 6, 1)):
+            ...
+
+    """
+    return replace_module_value(sys, 'pypy_version_info', value)
+
+
+def platform_pyimp(value):
+    """Mock :data:`platform.python_implementation`
+
+    Decorator example::
+
+        @mock.platform_pyimp('PyPy')
+        def test_foo(self):
+            ...
+
+    Context example::
+
+        with mock.platform_pyimp('PyPy'):
+            ...
+
+    """
+    return replace_module_value(platform, 'python_implementation', value)
 
 
 @decorator
 def sys_platform(value):
+    """Mock :data:`sys.platform`
+
+    Decorator example::
+
+        @mock.sys_platform('darwin')
+        def test_foo(self):
+            ...
+
+    Context example::
+
+        with mock.sys_platform('darwin'):
+            ...
+
+    """
+
     prev, sys.platform = sys.platform, value
     try:
         yield
@@ -274,6 +415,21 @@ def sys_platform(value):
 
 @decorator
 def reset_modules(*modules):
+    """Remove modules from :data:`sys.modules` by name,
+    and reset back again when the test/context returns.
+
+    Decorator example::
+
+        @mock.reset_modules('celery.result', 'celery.app.base')
+        def test_foo(self):
+            pass
+
+    Context example::
+
+        with mock.reset_modules('celery.result', 'celery.app.base'):
+            pass
+
+    """
     prev = {k: sys.modules.pop(k) for k in modules if k in sys.modules}
     try:
         yield
@@ -282,23 +438,8 @@ def reset_modules(*modules):
 
 
 @decorator
-def patch_modules(*modules):
-    prev = {}
-    for mod in modules:
-        prev[mod] = sys.modules.get(mod)
-        sys.modules[mod] = types.ModuleType(module_name(mod))
-    try:
-        yield
-    finally:
-        for name, mod in items(prev):
-            if mod is None:
-                sys.modules.pop(name, None)
-            else:
-                sys.modules[name] = mod
-
-
-@decorator
 def module(*names):
+    """Mock one or modules such that every attribute is a :class:`Mock`."""
     prev = {}
 
     class MockModule(types.ModuleType):
@@ -347,6 +488,29 @@ def mock_context(mock, typ=Mock):
 
 @decorator
 def open(typ=WhateverIO, side_effect=None):
+    """Patch builtins.open so that it returns StringIO object.
+
+    :param typ: File object for open to return.
+        Defaults to :class:`WhateverIO` which is the bastard child
+        of :class:`io.StringIO` and :class:`io.BytesIO` accepting
+        both bytes and unicode input.
+    :param side_effect: Additional side effect for when the open context
+        is entered.
+
+    Decorator example::
+
+        @mock.open()
+        def test_foo(self, open_fh):
+            something_opening_and_writing_a_file()
+            self.assertIn('foo', open_fh.getvalue())
+
+    Context example::
+
+        with mock.open(io.BytesIO) as open_fh:
+            something_opening_and_writing_bytes_to_a_file()
+            self.assertIn(b'foo', open_fh.getvalue())
+
+    """
     with patch(open_fqdn) as open_:
         with mock_context(open_) as context:
             if side_effect is not None:
@@ -358,6 +522,20 @@ def open(typ=WhateverIO, side_effect=None):
 
 @decorator
 def restore_logging():
+    """Restore root logger handlers after test returns.
+
+    Decorator example::
+
+        @mock.restore_logging()
+        def test_foo(self):
+            setup_logging()
+
+    Context example::
+
+        with mock.restore_logging():
+            setup_logging()
+
+    """
     outs = sys.stdout, sys.stderr, sys.__stdout__, sys.__stderr__
     root = logging.getLogger()
     level = root.level
@@ -373,6 +551,25 @@ def restore_logging():
 
 @decorator
 def module_exists(*modules):
+    """Patch one or more modules to ensure they exist.
+
+    A module name with multiple paths (e.g. gevent.monkey) will
+    ensure all parent modules are also patched (``gevent`` +
+    ``gevent.monkey``).
+
+    Decorator example::
+
+        @mock.module_exists('gevent.monkey')
+        def test_foo(self):
+            pass
+
+    Context example::
+
+        with mock.module_exists('gevent.monkey'):
+            gevent.monkey.patch_all = Mock(name='patch_all')
+            ...
+
+    """
     gen = []
     old_modules = []
     for module in modules:
