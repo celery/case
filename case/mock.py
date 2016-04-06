@@ -335,7 +335,7 @@ def replace_module_value(module, name, value=None):
                 pass
 
 
-def sys_version(value):
+def sys_version(value=None):
     """Mock :data:`sys.version_info`
 
     Decorator example::
@@ -353,7 +353,7 @@ def sys_version(value):
     return replace_module_value(sys, 'version_info', value)
 
 
-def pypy_version(value):
+def pypy_version(value=None):
     """Mock :data:`sys.pypy_version_info`
 
     Decorator example::
@@ -371,7 +371,7 @@ def pypy_version(value):
     return replace_module_value(sys, 'pypy_version_info', value)
 
 
-def platform_pyimp(value):
+def platform_pyimp(value=None):
     """Mock :data:`platform.python_implementation`
 
     Decorator example::
@@ -390,7 +390,7 @@ def platform_pyimp(value):
 
 
 @decorator
-def sys_platform(value):
+def sys_platform(value=None):
     """Mock :data:`sys.platform`
 
     Decorator example::
