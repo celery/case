@@ -1,6 +1,14 @@
 Changes
 =======
 
+.. _version-1.0.2:
+
+1.0.2
+=====
+:release-date: 2016-04-06 03:46 P.M PDT
+
+- Adds docstrings
+
 .. _version-1.0.1:
 
 1.0.1
