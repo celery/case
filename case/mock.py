@@ -430,7 +430,8 @@ def reset_modules(*modules):
             pass
 
     """
-    prev = {k: sys.modules.pop(k) for k in modules if k in sys.modules}
+    prev = dict((k, sys.modules.pop(k))
+                for k in modules if k in sys.modules)
     try:
         yield
     finally:

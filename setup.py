@@ -116,6 +116,8 @@ if sys.version_info[0] >= 3:
         install_requires.extend(reqs('pypy3.txt'))
 else:
     install_requires.extend(reqs('py2.txt'))
+    if sys.version_info < (2, 7):
+        install_requires.extend(reqs('py26.txt'))
 
 # -*- Tests Requires -*-
 
