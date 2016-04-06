@@ -21,6 +21,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.pngmath',
     'sphinx.ext.intersphinx',
+    'sphinxcontrib.cheeseshop',
 ]
 
 html_show_sphinx = False
