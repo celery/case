@@ -143,7 +143,7 @@ setup(
     author_email=meta['contact'],
     url=meta['homepage'],
     platforms=['any'],
-    license='LGPL',
+    license='BSD',
     packages=find_packages(exclude=['ez_setup', 'tests', 'tests.*']),
     zip_safe=False,
     install_requires=install_requires,
