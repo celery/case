@@ -64,9 +64,6 @@ gitclean: removepyc
 gitcleanforce:
 	git clean -xdf
 
-bump_version:
-	$(PYTHON) extra/release/bump_version.py case/__init__.py README.rst
-
 distcheck: flakecheck apicheck indexcheck readmecheck test gitclean
 
 dist: readme docsclean gitcleanforce removepyc
