@@ -1,6 +1,15 @@
 Changes
 =======
 
+.. _version-1.1.2:
+
+1.1.1
+=====
+:release-date: 2016-04-08 11:34 P.M PDT
+
+- Also :func:`case.patch.multiple`, and :func:`case.patch.object`
+  now gives :class:`case.MagicMock`.
+
 .. _version-1.1.1:
 
 1.1.1
