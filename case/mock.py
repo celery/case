@@ -40,7 +40,6 @@ __all__ = [
 
 ANY = mock.ANY
 call = mock.call
-patch = mock.patch
 sentinel = mock.sentinel
 
 
@@ -149,6 +148,10 @@ def ContextMock(*args, **kwargs):
     # so it must return None here.
     obj.__exit__.return_value = None
     return obj
+
+
+def patch(*args, **kwargs):
+    return mock.patch(*args, **dict({'new_callable': MagicMock}, **kwargs))
 
 
 def _bind(f, o):
