@@ -88,6 +88,14 @@ class MockMixin(object):
         for key, value in items(attrs):
             setattr(self, key, value)
 
+    def assert_not_called(_mock_self):
+        """assert that the mock was never called."""
+        self = _mock_self
+        if self.call_count != 0:
+            msg = ("Expected '%s' to not have been called. Called %s times." %
+                   (self._mock_name or 'mock', self.call_count))
+            raise AssertionError(msg)
+
     def assert_called(_mock_self):
         """assert that the mock was called at least once."""
         self = _mock_self
