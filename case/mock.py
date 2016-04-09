@@ -150,8 +150,21 @@ def ContextMock(*args, **kwargs):
     return obj
 
 
-def patch(*args, **kwargs):
-    return mock.patch(*args, **dict({'new_callable': MagicMock}, **kwargs))
+def _create_patcher(fun):
+
+    @wraps(fun)
+    def patcher(*args, **kwargs):
+        if not kwargs.get('new'):
+            kwargs.setdefault('new_callable', MagicMock)
+        return fun(*args, **kwargs)
+
+    return patcher
+patch = _create_patcher(mock.patch)
+patch.dict = mock.patch.dict
+patch.multiple = _create_patcher(mock.patch.multiple)
+patch.object = _create_patcher(mock.patch.object)
+patch.stopall = mock.patch.stopall
+patch.TEST_PREFIX = mock.patch.TEST_PREFIX
 
 
 def _bind(f, o):
