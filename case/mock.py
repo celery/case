@@ -154,7 +154,7 @@ def _create_patcher(fun):
 
     @wraps(fun)
     def patcher(*args, **kwargs):
-        if not kwargs.get('new'):
+        if not kwargs.get('new') and not kwargs.get('autospec'):
             kwargs.setdefault('new_callable', MagicMock)
         return fun(*args, **kwargs)
 
