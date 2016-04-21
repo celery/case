@@ -150,19 +150,36 @@ def ContextMock(*args, **kwargs):
     return obj
 
 
-def _create_patcher(fun):
+def _patch_sig1(target,
+                new=None, spec=None, create=None,
+                spec_set=None, autospec=None, new_callable=None, **kwargs):
+    # signature for mock.patch,
+    # used to inject new `new_callable` argument default.
+    return new, autospec, new_callable
+
+
+def _patch_sig2(target, attribute,
+                new=None, spec=None, create=False, spec_set=None,
+                autospec=None, new_callable=None, **kwargs):
+    # signature for mock.patch.multiple + mock.patch.object,
+    # used to inject new `new_callable` argument default.
+    return new, autospec, new_callable
+
+
+def _create_patcher(fun, signature):
 
     @wraps(fun)
     def patcher(*args, **kwargs):
-        if not kwargs.get('new') and not kwargs.get('autospec'):
+        new, autospec, new_callable = signature(*args, **kwargs)
+        if new is None and autospec is None and new_callable is None:
             kwargs.setdefault('new_callable', MagicMock)
         return fun(*args, **kwargs)
 
     return patcher
-patch = _create_patcher(mock.patch)
+patch = _create_patcher(mock.patch, _patch_sig1)
 patch.dict = mock.patch.dict
-patch.multiple = _create_patcher(mock.patch.multiple)
-patch.object = _create_patcher(mock.patch.object)
+patch.multiple = _create_patcher(mock.patch.multiple, _patch_sig2)
+patch.object = _create_patcher(mock.patch.object, _patch_sig2)
 patch.stopall = mock.patch.stopall
 patch.TEST_PREFIX = mock.patch.TEST_PREFIX
 
