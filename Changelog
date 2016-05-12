@@ -1,11 +1,22 @@
 Changes
 =======
 
+.. _version-1.1.4:
+
+1.1.4
+=====
+:release-date: 2016-05-12 03:04 P.M PDT
+:release-by: Ask Solem
+
+- ``case.patch.*`` functions now supports using ``new`` as a positional
+  argument, for compatibility with ``mock.patch``.
+
 .. _version-1.1.3:
 
 1.1.3
 =====
 :release-date: 2016-04-19 04:41 P.M PDT
+:release-by: Ask Solem
 
 - ``case.patch(autospec=True)`` now works.
 
@@ -16,6 +27,7 @@ Changes
 1.1.2
 =====
 :release-date: 2016-04-08 11:34 P.M PDT
+:release-by: Ask Solem
 
 - Also :func:`case.patch.multiple`, and :func:`case.patch.object`
   now gives :class:`case.MagicMock`.
@@ -25,6 +37,7 @@ Changes
 1.1.1
 =====
 :release-date: 2016-04-08 11:13 P.M PDT
+:release-by: Ask Solem
 
 - :func:`case.patch` now gives :class:`case.MagicMock` (not
   ``mock.MagicMock``).
@@ -34,6 +47,7 @@ Changes
 1.1.0
 =====
 :release-date: 2016-04-08 10:00 P.M PDT
+:release-by: Ask Solem
 
 - Adds new Mock methods from Python 3.6:
 
@@ -62,6 +76,7 @@ Changes
 1.0.3
 =====
 :release-date: 2016-04-06 04:00 P.M PDT
+:release-by: Ask Solem
 
 - Python 2.6 compatibility.
 
@@ -72,6 +87,7 @@ Changes
 1.0.2
 =====
 :release-date: 2016-04-06 03:46 P.M PDT
+:release-by: Ask Solem
 
 - Adds docstrings
 
@@ -80,6 +96,7 @@ Changes
 1.0.1
 =====
 :release-date: 2016-04-05 04:00 P.M PDT
+:release-by: Ask Solem
 
 - Fixed issues with Python 3
 
