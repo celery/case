@@ -32,7 +32,7 @@ __all__ = [
     'ANY', 'ContextMock', 'MagicMock', 'Mock', 'MockCallbacks',
     'call', 'patch', 'sentinel',
 
-    'wrap_logger', 'environ', 'sleepdeprived', 'mask_modules',
+    'wrap_logger', 'environ', 'sleepdeprived', 'mask_modules', 'mute',
     'stdouts', 'replace_module_value', 'sys_version', 'pypy_version',
     'platform_pyimp', 'sys_platform', 'reset_modules', 'module',
     'open', 'restore_logging', 'module_exists', 'create_patcher',
@@ -355,6 +355,33 @@ def stdouts():
 
     try:
         yield mystdout, mystderr
+    finally:
+        sys.stdout = prev_out
+        sys.stderr = prev_err
+        sys.__stdout__ = prev_rout
+        sys.__stderr__ = prev_rerr
+
+
+@decorator
+def mute():
+    """Redirect `sys.stdout` and `sys.stderr` to /dev/null, silencent them.
+    Decorator example::
+        @mock.mute
+        def test_foo(self):
+            something()
+    Context example::
+        with mock.mute():
+            something()
+    """
+    prev_out, prev_err = sys.stdout, sys.stderr
+    prev_rout, prev_rerr = sys.__stdout__, sys.__stderr__
+    devnull = open(os.devnull, 'w')
+    mystdout, mystderr = devnull, devnull
+    sys.stdout = sys.__stdout__ = mystdout
+    sys.stderr = sys.__stderr__ = mystderr
+
+    try:
+        yield
     finally:
         sys.stdout = prev_out
         sys.stderr = prev_err
