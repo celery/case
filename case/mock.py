@@ -67,6 +67,32 @@ class MockMixin(object):
         self.side_effect = on_call
         return self
 
+    def on_nth_call_do_raise(self, excA, excB, n=1):
+        """Change exception raised after ``n`` calls.
+
+        Mock will raise excA until called `n` times, which after
+        it will raise excB'.
+
+        Example::
+
+            >>> mock.on_nth_call_do_raise(KeyError(), RuntimError(), n=3)
+            >>> mock()
+            KeyError()
+            >>> mock()
+            KeyError()
+            >>> mock()
+            KeyError()
+            >>> mock()
+            RuntimeError()
+
+        """
+        def on_call(*args, **kwargs):
+            if self.call_count >= n:
+                self.side_effect = excB
+            raise excA
+        self.side_effect = on_call
+        return self
+
     def on_nth_call_return(self, retval, n=1):
         """Change Mock to return specific return value after ``n`` calls.
 
