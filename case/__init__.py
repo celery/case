@@ -20,7 +20,7 @@ __all__ = [
     b'Case',
 
     b'ANY', b'ContextMock', b'MagicMock', b'Mock',
-    b'call', b'patch',  b'sentinel',
+    b'call', b'patch', b'sentinel',
 
     b'mock', b'skip',
 ]
