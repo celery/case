@@ -1,6 +1,22 @@
 Changes
 =======
 
+.. _version-1.2.0:
+
+1.2.0
+=====
+:release-date: 2016-06-13 05:00 P.M PDT
+:release-by: Ask Solem
+
+- Adds ``mock.mute`` decorator to suppress stdout with no return value.
+
+    Contributed by Tony Narlock.
+
+- Adds ``Mock.on_nth_call_do_raise(excA, excB, n)``.
+
+    This will make the mock raise excA until called n times, in which
+    it will start to raise excB.
+
 .. _version-1.1.4:
 
 1.1.4
