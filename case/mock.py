@@ -17,6 +17,14 @@ from six.moves import builtins
 from .utils import WhateverIO, decorator, get_logger_handlers, noop
 
 try:
+    from importlib import reload
+except ImportError:
+    try:
+        from imp import reload
+    except ImportError:
+        reload = reload
+
+try:
     from unittest import mock
 except ImportError:
     import mock  # noqa
