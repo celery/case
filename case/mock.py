@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import importlib
 import inspect
 import logging
 import os
@@ -550,6 +551,8 @@ def reset_modules(*modules):
     prev = dict((k, sys.modules.pop(k))
                 for k in modules if k in sys.modules)
     try:
+        for k in modules:
+            reload(importlib.import_module(k))
         yield
     finally:
         sys.modules.update(prev)
