@@ -2,7 +2,7 @@
  Python unittest utilities
 =====================================================================
 
-:Version: 1.2.1
+:Version: 1.2.2
 :Web: http://case.readthedocs.org/
 :Download: http://pypi.python.org/pypi/case/
 :Source: http://github.com/celery/case/
