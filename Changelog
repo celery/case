@@ -1,6 +1,19 @@
 Changes
 =======
 
+.. _version-1.2.1:
+
+1.2.1
+=====
+:release-date: 2016-06-23 12:111 P.M PDT
+:release-by: Ask Solem
+
+- ``mock.reload_modules`` now re-imports the module and
+  calls ``reload()`` on it.
+
+  This fixes issues with side effects not being properly reset after
+  context exits.
+
 .. _version-1.2.0:
 
 1.2.0
