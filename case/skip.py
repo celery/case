@@ -1,8 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
 import importlib
 import os
 import sys
+
+from typing import Any, Generator
 
 from nose import SkipTest
 
@@ -22,9 +22,13 @@ __all__ = [
     'if_python_version_after', 'if_python_version_before',
 ]
 
+# Should be: Tuple[BaseException, ...]
+# but mypy complains about this for the moment.
+ExceptionTuple = Any
+
 
 @decorator
-def if_python_version_before(*version, **kwargs):
+def if_python_version_before(*version: int, **kwargs) -> Generator:
     """Skip test if Python version is less than ``*version``.
 
     Example::
@@ -41,7 +45,7 @@ def if_python_version_before(*version, **kwargs):
 
 
 @decorator
-def if_python_version_after(*version, **kwargs):
+def if_python_version_after(*version: int, **kwargs) -> Generator:
     """Skip test if Python version is greater or equal to ``*version``.
 
     Example::
@@ -57,7 +61,7 @@ def if_python_version_after(*version, **kwargs):
     yield
 
 
-def if_python3(*version, **kwargs):
+def if_python3(*version: int, **kwargs) -> Generator:
     """Skip test if Python version is 3 or later.
 
     Example::
@@ -68,7 +72,7 @@ def if_python3(*version, **kwargs):
     return if_python_version_after(3, *version, **kwargs)
 
 
-def unless_python3(*version, **kwargs):
+def unless_python3(*version: int, **kwargs) -> Generator:
     """Skip test if Python version is Python 2 or earlier.
 
     Example::
@@ -80,7 +84,7 @@ def unless_python3(*version, **kwargs):
 
 
 @decorator
-def if_environ(env_var_name):
+def if_environ(env_var_name: str) -> Generator:
     """Skip test if environment variable ``env_var_name`` is defined.
 
     Example::
@@ -94,7 +98,7 @@ def if_environ(env_var_name):
 
 
 @decorator
-def unless_environ(env_var_name):
+def unless_environ(env_var_name: str) -> Generator:
     """Skip test if environment variable ``env_var_name`` is undefined.
 
     Example::
@@ -108,11 +112,11 @@ def unless_environ(env_var_name):
 
 
 @decorator
-def _skip_test(reason, sign):
+def _skip_test(reason: str, sign: str) -> None:
     raise SkipTest('{0}: {1}'.format(sign, reason))
 
 
-def todo(reason):
+def todo(reason: str) -> Generator:
     """Skip test flagging case as TODO.
 
     Example::
@@ -123,12 +127,13 @@ def todo(reason):
     return _skip_test(reason, sign='TODO')
 
 
-def skip(reason):
+def skip(reason: str) -> Generator:
     return _skip_test(reason, sign='SKIP')
 
 
 @decorator
-def if_module(module, name=None, import_errors=(ImportError,)):
+def if_module(module: str, name: str = None,
+              import_errors: ExceptionTuple = (ImportError,)) -> Generator:
     """Skip test if ``module`` can be imported.
 
     :param module: Module to import.
@@ -151,7 +156,8 @@ def if_module(module, name=None, import_errors=(ImportError,)):
 
 
 @decorator
-def unless_module(module, name=None, import_errors=(ImportError,)):
+def unless_module(module: str, name: str = None,
+                  import_errors: ExceptionTuple = (ImportError,)) -> Generator:
     """Skip test if ``module`` can not be imported.
 
     :param module: Module to import.
@@ -172,8 +178,9 @@ def unless_module(module, name=None, import_errors=(ImportError,)):
 
 
 @decorator
-def if_symbol(symbol, name=None,
-              import_errors=(AttributeError, ImportError)):
+def if_symbol(symbol: str, name: str = None,
+              import_errors: ExceptionTuple=(AttributeError, ImportError)
+              ) -> Generator:
     """Skip test if ``symbol`` can be imported.
 
     :param module: Symbol to import.
@@ -196,8 +203,9 @@ def if_symbol(symbol, name=None,
 
 
 @decorator
-def unless_symbol(symbol, name=None,
-                  import_errors=(AttributeError, ImportError)):
+def unless_symbol(symbol: str, name: str = None,
+                  import_errors: ExceptionTuple=(AttributeError, ImportError)
+                  ) -> Generator:
     """Skip test if ``symbol`` cannot be imported.
 
     :param module: Symbol to import.
@@ -218,7 +226,7 @@ def unless_symbol(symbol, name=None,
 
 
 @decorator
-def if_platform(platform_name, name=None):
+def if_platform(platform_name: str, name: str = None) -> Generator:
     """Skip test if :data:`sys.platform` name matches ``platform_name``.
 
     :param platform_name: Name to match with :data:`sys.platform`.
@@ -234,7 +242,7 @@ def if_platform(platform_name, name=None):
     yield
 
 
-def if_jython():
+def if_jython() -> Generator:
     """Skip test if running under Jython.
 
     Example::
@@ -245,7 +253,7 @@ def if_jython():
     return if_platform('java', name='Jython')
 
 
-def if_win32():
+def if_win32() -> Generator:
     """Skip test if running under Windows.
 
     Example::
@@ -256,7 +264,7 @@ def if_win32():
     return if_platform('win32', name='Windows')
 
 
-def if_darwin():
+def if_darwin() -> Generator:
     """Skip test if running under OS X.
 
     Example::
@@ -268,7 +276,7 @@ def if_darwin():
 
 
 @decorator
-def unless_platform(platform_name, name=None):
+def unless_platform(platform_name: str, name: str = None) -> Generator:
     """Skip test if :data:`sys.platform` name does not match ``platform_name``.
 
     :param platform_name: Name to match with :data:`sys.platform`.
@@ -284,23 +292,23 @@ def unless_platform(platform_name, name=None):
     yield
 
 
-def unless_jython():
+def unless_jython() -> Generator:
     """Skip test if not running under Jython."""
     return unless_platform('java', name='Jython')
 
 
-def unless_win32():
+def unless_win32() -> Generator:
     """Skip test if not running under Windows."""
     return unless_platform('win32', name='Windows')
 
 
-def unless_darwin():
+def unless_darwin() -> Generator:
     """Skip test if not running under OS X."""
     return unless_platform('darwin', name='OS X')
 
 
 @decorator
-def if_pypy(reason='does not work on PyPy'):
+def if_pypy(reason: str = 'does not work on PyPy') -> Generator:
     """Skip test if running on PyPy.
 
     Example::
@@ -314,7 +322,7 @@ def if_pypy(reason='does not work on PyPy'):
 
 
 @decorator
-def unless_pypy(reason='only applicable for PyPy'):
+def unless_pypy(reason: str = 'only applicable for PyPy') -> Generator:
     """Skip test if not running on PyPy.
 
     Example::

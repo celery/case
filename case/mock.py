@@ -1,5 +1,4 @@
-from __future__ import absolute_import, unicode_literals
-
+import builtins
 import importlib
 import inspect
 import logging
@@ -11,31 +10,13 @@ import types
 
 from contextlib import contextmanager
 from functools import wraps
-from six import reraise, string_types, iteritems as items
-from six.moves import builtins
+from io import StringIO
+from importlib import reload
+from types import ModuleType
+from typing import Any, Callable, Dict, Generator, Sequence, Tuple
+from unittest import mock
 
-from .utils import WhateverIO, decorator, get_logger_handlers, noop
-
-try:
-    from importlib import reload
-except ImportError:
-    try:
-        from imp import reload
-    except ImportError:
-        reload = reload
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock  # noqa
-
-PY3 = sys.version_info[0] >= 3
-if PY3:
-    open_fqdn = 'builtins.open'
-    module_name_t = str
-else:
-    open_fqdn = '__builtin__.open'  # noqa
-    module_name_t = bytes  # noqa
+from .utils import decorator, get_logger_handlers, noop
 
 __all__ = [
     'ANY', 'ContextMock', 'MagicMock', 'Mock', 'MockCallbacks',
@@ -52,16 +33,20 @@ call = mock.call
 sentinel = mock.sentinel
 
 
-def create_patcher(*partial_path):
+class MockT(object):
+    ...
 
-    def patcher(name, **kwargs):
+
+def create_patcher(*partial_path: str) -> Callable:
+
+    def patcher(name: str, **kwargs) -> 'Mock':
         return patch(".".join(partial_path + (name, )), **kwargs)
     return patcher
 
 
-class MockMixin(object):
+class MockMixin(MockT):
 
-    def on_nth_call_do(self, side_effect, n=1):
+    def on_nth_call_do(self, side_effect: Any, n: int = 1) -> MockT:
         """Change Mock side effect after ``n`` calls.
 
         Example::
@@ -76,7 +61,8 @@ class MockMixin(object):
         self.side_effect = on_call
         return self
 
-    def on_nth_call_do_raise(self, excA, excB, n=1):
+    def on_nth_call_do_raise(self, excA: BaseException, excB: BaseException,
+                             n: int = 1) -> MockT:
         """Change exception raised after ``n`` calls.
 
         Mock will raise excA until called `n` times, which after
@@ -102,7 +88,7 @@ class MockMixin(object):
         self.side_effect = on_call
         return self
 
-    def on_nth_call_return(self, retval, n=1):
+    def on_nth_call_return(self, retval: Any, n: int = 1) -> 'Mock':
         """Change Mock to return specific return value after ``n`` calls.
 
         Example::
@@ -118,29 +104,27 @@ class MockMixin(object):
         self.side_effect = on_call
         return self
 
-    def _mock_update_attributes(self, attrs={}, **kwargs):
-        for key, value in items(attrs):
+    def _mock_update_attributes(self,
+                                attrs: Dict[str, Any] = {}, **kwargs) -> None:
+        for key, value in attrs.items():
             setattr(self, key, value)
 
-    def assert_not_called(_mock_self):
+    def assert_not_called(self) -> None:
         """assert that the mock was never called."""
-        self = _mock_self
         if self.call_count != 0:
             msg = ("Expected '%s' to not have been called. Called %s times." %
                    (self._mock_name or 'mock', self.call_count))
             raise AssertionError(msg)
 
-    def assert_called(_mock_self):
+    def assert_called(self) -> None:
         """assert that the mock was called at least once."""
-        self = _mock_self
         if self.call_count == 0:
             msg = ("Expected '%s' to have been called." %
                    self._mock_name or 'mock')
             raise AssertionError(msg)
 
-    def assert_called_once(_mock_self):
+    def assert_called_once(self) -> None:
         """assert that the mock was called only once."""
-        self = _mock_self
         if not self.call_count == 1:
             msg = ("Expected '%s' to have been called once. Called %s times." %
                    (self._mock_name or 'mock', self.call_count))
@@ -149,14 +133,14 @@ class MockMixin(object):
 
 class Mock(mock.Mock, MockMixin):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(Mock, self).__init__(*args, **kwargs)
         self._mock_update_attributes(**kwargs)
 
 
 class MagicMock(mock.MagicMock, MockMixin):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(MagicMock, self).__init__(*args, **kwargs)
         self._mock_update_attributes(**kwargs)
 
@@ -166,14 +150,14 @@ class _ContextMock(Mock):
     as the :keyword:`with` statement requires these to be implemented
     in the class, not just the instance."""
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         return self
 
-    def __exit__(self, *exc_info):
+    def __exit__(self, *exc_info) -> Any:
         pass
 
 
-def ContextMock(*args, **kwargs):
+def ContextMock(*args, **kwargs) -> MockT:
     """Mock that mocks :keyword:`with` statement contexts."""
     obj = _ContextMock(*args, **kwargs)
     obj.attach_mock(_ContextMock(), '__enter__')
@@ -185,26 +169,31 @@ def ContextMock(*args, **kwargs):
     return obj
 
 
-def _patch_sig1(target,
-                new=None, spec=None, create=None,
-                spec_set=None, autospec=None, new_callable=None, **kwargs):
+def _patch_sig1(target: str,
+                new: Any = None, spec: Sequence[str] = None,
+                create: bool = None,
+                spec_set: Any = None, autospec: Any = None,
+                new_callable: Callable = None,
+                **kwargs) -> Tuple[Any, Any, Callable]:
     # signature for mock.patch,
     # used to inject new `new_callable` argument default.
     return new, autospec, new_callable
 
 
-def _patch_sig2(target, attribute,
-                new=None, spec=None, create=False, spec_set=None,
-                autospec=None, new_callable=None, **kwargs):
+def _patch_sig2(target: str, attribute: str,
+                new: Any=None, spec: Sequence[str] = None,
+                create: bool = False, spec_set: Any = None,
+                autospec: Any = None, new_callable: Callable = None,
+                **kwargs) -> Tuple[Any, Any, Callable]:
     # signature for mock.patch.multiple + mock.patch.object,
     # used to inject new `new_callable` argument default.
     return new, autospec, new_callable
 
 
-def _create_patcher(fun, signature):
+def _create_patcher(fun, signature) -> Callable:
 
     @wraps(fun)
-    def patcher(*args, **kwargs):
+    def patcher(*args, **kwargs) -> Any:
         new, autospec, new_callable = signature(*args, **kwargs)
         if new is None and autospec is None and new_callable is None:
             kwargs.setdefault('new_callable', MagicMock)
@@ -219,37 +208,19 @@ patch.stopall = mock.patch.stopall
 patch.TEST_PREFIX = mock.patch.TEST_PREFIX
 
 
-def _bind(f, o):
+def _bind(f: Callable, o: Any) -> Callable:
     @wraps(f)
-    def bound_meth(*fargs, **fkwargs):
+    def bound_meth(*fargs, **fkwargs) -> Any:
         return f(o, *fargs, **fkwargs)
     return bound_meth
 
 
-if PY3:  # pragma: no cover
-    def _get_class_fun(meth):
-        return meth
-
-    def module_name(s):
-        if isinstance(s, bytes):
-            return s.decode()
-        return s
-else:
-    def _get_class_fun(meth):  # noqa
-        return meth.__func__
-
-    def module_name(s):  # noqa
-        if isinstance(s, unicode):
-            return s.encode()
-        return s
-
-
 class MockCallbacks(object):
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> Any:
         r = Mock(name=cls.__name__)
-        _get_class_fun(cls.__init__)(r, *args, **kwargs)
-        for key, value in items(vars(cls)):
+        cls.__init__(r, *args, **kwargs)
+        for key, value in vars(cls).items():
             if key not in ('__dict__', '__weakref__', '__new__', '__init__'):
                 if inspect.ismethod(value) or inspect.isfunction(value):
                     r.__getattr__(key).side_effect = _bind(value, r)
@@ -259,7 +230,8 @@ class MockCallbacks(object):
 
 
 @decorator
-def wrap_logger(logger, loglevel=logging.ERROR):
+def wrap_logger(logger: logging.Logger,
+                loglevel: int = logging.ERROR) -> Generator:
     """Wrap :class:`logging.Logger` with a StringIO() handler.
 
     yields a StringIO handle.
@@ -272,7 +244,7 @@ def wrap_logger(logger, loglevel=logging.ERROR):
 
     """
     old_handlers = get_logger_handlers(logger)
-    sio = WhateverIO()
+    sio = StringIO()
     siohandler = logging.StreamHandler(sio)
     logger.handlers = [siohandler]
 
@@ -283,7 +255,7 @@ def wrap_logger(logger, loglevel=logging.ERROR):
 
 
 @decorator
-def environ(env_name, env_value):
+def environ(env_name: str, env_value: str) -> Generator:
     """Mock environment variable value.
 
     Example::
@@ -306,7 +278,7 @@ def environ(env_name, env_value):
 
 
 @decorator
-def sleepdeprived(module=time):
+def sleepdeprived(module: ModuleType=time) -> Generator:
     """Mock time.sleep to do nothing.
 
     Example::
@@ -325,7 +297,7 @@ def sleepdeprived(module=time):
 # Taken from
 # http://bitbucket.org/runeh/snippets/src/tip/missing_modules.py
 @decorator
-def mask_modules(*modnames):
+def mask_modules(*modnames: str) -> Generator:
     """Ban some modules from being importable inside the context
 
     For example::
@@ -364,7 +336,7 @@ def mask_modules(*modnames):
 
 
 @decorator
-def stdouts():
+def stdouts() -> Generator:
     """Override `sys.stdout` and `sys.stderr` with `StringIO`
     instances.
 
@@ -384,7 +356,7 @@ def stdouts():
     """
     prev_out, prev_err = sys.stdout, sys.stderr
     prev_rout, prev_rerr = sys.__stdout__, sys.__stderr__
-    mystdout, mystderr = WhateverIO(), WhateverIO()
+    mystdout, mystderr = StringIO(), StringIO()
     sys.stdout = sys.__stdout__ = mystdout
     sys.stderr = sys.__stderr__ = mystderr
 
@@ -398,7 +370,7 @@ def stdouts():
 
 
 @decorator
-def mute():
+def mute() -> Generator:
     """Redirect `sys.stdout` and `sys.stderr` to /dev/null, silencent them.
     Decorator example::
         @mock.mute
@@ -425,7 +397,8 @@ def mute():
 
 
 @decorator
-def replace_module_value(module, name, value=None):
+def replace_module_value(module: ModuleType, name: str,
+                         value: Any = None) -> Generator:
     """Mock module value, given a module, attribute name and value.
 
     Decorator example::
@@ -461,7 +434,7 @@ def replace_module_value(module, name, value=None):
                 pass
 
 
-def sys_version(value=None):
+def sys_version(value: Tuple[int, ...] = None) -> Generator:
     """Mock :data:`sys.version_info`
 
     Decorator example::
@@ -479,7 +452,7 @@ def sys_version(value=None):
     return replace_module_value(sys, 'version_info', value)
 
 
-def pypy_version(value=None):
+def pypy_version(value: Tuple[int, ...] = None) -> Generator:
     """Mock :data:`sys.pypy_version_info`
 
     Decorator example::
@@ -497,7 +470,7 @@ def pypy_version(value=None):
     return replace_module_value(sys, 'pypy_version_info', value)
 
 
-def platform_pyimp(value=None):
+def platform_pyimp(value: str = None) -> Generator:
     """Mock :data:`platform.python_implementation`
 
     Decorator example::
@@ -516,7 +489,7 @@ def platform_pyimp(value=None):
 
 
 @decorator
-def sys_platform(value=None):
+def sys_platform(value: str = None) -> Generator:
     """Mock :data:`sys.platform`
 
     Decorator example::
@@ -540,7 +513,7 @@ def sys_platform(value=None):
 
 
 @decorator
-def reset_modules(*modules):
+def reset_modules(*modules: str) -> Generator:
     """Remove modules from :data:`sys.modules` by name,
     and reset back again when the test/context returns.
 
@@ -567,7 +540,7 @@ def reset_modules(*modules):
 
 
 @decorator
-def module(*names):
+def module(*names: str) -> Generator:
     """Mock one or modules such that every attribute is a :class:`Mock`."""
     prev = {}
 
@@ -583,7 +556,7 @@ def module(*names):
             prev[name] = sys.modules[name]
         except KeyError:
             pass
-        mod = sys.modules[name] = MockModule(module_name(name))
+        mod = sys.modules[name] = MockModule(name)
         mods.append(mod)
     try:
         yield mods
@@ -599,14 +572,14 @@ def module(*names):
 
 
 @contextmanager
-def mock_context(mock, typ=Mock):
+def mock_context(mock: MockT, typ: Any = Mock) -> Generator:
     context = mock.return_value = Mock()
     context.__enter__ = typ()
     context.__exit__ = typ()
 
     def on_exit(*x):
         if x[0]:
-            reraise(x[0], x[1], x[2])
+            raise x[1].with_traceback(x[2])
     context.__exit__.side_effect = on_exit
     context.__enter__.return_value = context
     try:
@@ -616,13 +589,11 @@ def mock_context(mock, typ=Mock):
 
 
 @decorator
-def open(typ=WhateverIO, side_effect=None):
+def open(typ: Any = StringIO, side_effect: Any = None) -> Generator:
     """Patch builtins.open so that it returns StringIO object.
 
     :param typ: File object for open to return.
-        Defaults to :class:`WhateverIO` which is the bastard child
-        of :class:`io.StringIO` and :class:`io.BytesIO` accepting
-        both bytes and unicode input.
+        Defaults to :class:`io.StringIO`.
     :param side_effect: Additional side effect for when the open context
         is entered.
 
@@ -640,7 +611,7 @@ def open(typ=WhateverIO, side_effect=None):
             self.assertIn(b'foo', open_fh.getvalue())
 
     """
-    with patch(open_fqdn) as open_:
+    with patch('builtins.open') as open_:
         with mock_context(open_) as context:
             if side_effect is not None:
                 context.__enter__.side_effect = side_effect
@@ -650,7 +621,7 @@ def open(typ=WhateverIO, side_effect=None):
 
 
 @decorator
-def restore_logging():
+def restore_logging() -> Generator:
     """Restore root logger handlers after test returns.
 
     Decorator example::
@@ -679,7 +650,7 @@ def restore_logging():
 
 
 @decorator
-def module_exists(*modules):
+def module_exists(*modules: str) -> Generator:
     """Patch one or more modules to ensure they exist.
 
     A module name with multiple paths (e.g. gevent.monkey) will
@@ -702,8 +673,8 @@ def module_exists(*modules):
     gen = []
     old_modules = []
     for module in modules:
-        if isinstance(module, string_types):
-            module = types.ModuleType(module_name(module))
+        if isinstance(module, str):
+            module = types.ModuleType(module)
         gen.append(module)
         if module.__name__ in sys.modules:
             old_modules.append(sys.modules[module.__name__])
