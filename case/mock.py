@@ -54,8 +54,8 @@ sentinel = mock.sentinel
 
 def create_patcher(*partial_path):
 
-    def patcher(name, **kwargs):
-        return patch(".".join(partial_path + (name, )), **kwargs)
+    def patcher(name, *args, **kwargs):
+        return patch(".".join(partial_path + (name, )), *args, **kwargs)
     return patcher
 
 
