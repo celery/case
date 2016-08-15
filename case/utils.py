@@ -94,12 +94,12 @@ def decorator(predicate):
                 return cls
             else:
                 @wraps(cls)
-                def around_case(self, *args, **kwargs):
+                def around_case(*args, **kwargs):
                     with context(*pargs, **pkwargs) as context_args:
                         context_args = context_args or ()
                         if not isinstance(context_args, tuple):
                             context_args = (context_args,)
-                        return cls(*(self,) + args + context_args, **kwargs)
+                        return cls(*args + context_args, **kwargs)
                 return around_case
 
         if len(pargs) == 1 and callable(pargs[0]):
