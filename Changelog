@@ -1,6 +1,17 @@
 Changes
 =======
 
+.. _version-1.2.3:
+
+1.2.3
+=====
+:release-date: 2016-06-15 03:00 P.M PDT
+:release-by: Ask Solem
+
+- Case decorators now supports py.test.
+
+- Patcher created by create_patcher now accepts *args.
+
 .. _version-1.2.2:
 
 1.2.2
