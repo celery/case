@@ -2,18 +2,31 @@
  Python unittest utilities
 =====================================================================
 
+|build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
+
 .. include:: ../includes/introduction.txt
 
 .. include:: ../includes/installation.txt
 
-.. image:: https://secure.travis-ci.org/celery/case.png?branch=master
+.. |build-status| image:: https://secure.travis-ci.org/celery/case.png?branch=master
     :alt: Build status
     :target: https://travis-ci.org/celery/case
 
-.. image:: https://codecov.io/github/celery/case/coverage.svg?branch=master
+.. |coverage| image:: https://codecov.io/github/celery/case/coverage.svg?branch=master
     :target: https://codecov.io/github/celery/case?branch=master
 
-.. image:: https://d2weczhvl823v0.cloudfront.net/celery/case/trend.png
-    :alt: Bitdeli badge
-    :target: https://bitdeli.com/free
+.. |license| image:: https://img.shields.io/pypi/l/case.svg
+    :alt: BSD License
+    :target: https://opensource.org/licenses/BSD-3-Clause
 
+.. |wheel| image:: https://img.shields.io/pypi/wheel/case.svg
+    :alt: Case can be installed via wheel
+    :target: http://pypi.python.org/pypi/case/
+
+.. |pyversion| image:: https://img.shields.io/pypi/pyversions/case.svg
+    :alt: Supported Python versions.
+    :target: http://pypi.python.org/pypi/case/
+
+.. |pyimp| image:: https://img.shields.io/pypi/implementation/case.svg
+    :alt: Support Python implementations.
+    :target: http://pypi.python.org/pypi/case/
