@@ -1,11 +1,37 @@
 Changes
 =======
 
+.. _version-1.3.0:
+
+1.3.0
+=====
+:release-date: 2016-07-18 05:33 p.m. PDT
+:release-by: Ask Solem
+
+- Case is now a py.test plugin and provides a `patching` fixture
+  as a shortcut to `monkeypatch` setting the value to a mock.
+
+    This does not have any effects for users not using py.test.
+
+    Example:
+
+    .. code-block:: python
+
+        def test_foo(patching):
+            # execv value here will be mock.MagicMock by default.
+            execv = patching('os.execv')
+
+            patching('sys.platform', 'darwin')  # set concrete value
+            patching.setenv('DJANGO_SETTINGS_MODULE', 'x.settings')
+
+            # val will be of type mock.MagicMock by default
+            val = patching.setitem('path.to.dict', 'KEY')
+
 .. _version-1.2.3:
 
 1.2.3
 =====
-:release-date: 2016-06-15 03:00 P.M PDT
+:release-date: 2016-06-15 03:00 p.m. PDT
 :release-by: Ask Solem
 
 - Case decorators now supports py.test.
@@ -16,7 +42,7 @@ Changes
 
 1.2.2
 =====
-:release-date: 2016-06-23 02:46 P.M PDT
+:release-date: 2016-06-23 02:46 p.m. PDT
 :release-by: Ask Solem
 
 - ``mock.reload_modules``: Fixed compatibility with Python 3.
@@ -25,7 +51,7 @@ Changes
 
 1.2.1
 =====
-:release-date: 2016-06-23 12:111 P.M PDT
+:release-date: 2016-06-23 12:111 p.m. PDT
 :release-by: Ask Solem
 
 - ``mock.reload_modules`` now re-imports the module and
@@ -38,7 +64,7 @@ Changes
 
 1.2.0
 =====
-:release-date: 2016-06-13 05:00 P.M PDT
+:release-date: 2016-06-13 05:00 p.m. PDT
 :release-by: Ask Solem
 
 - Adds ``mock.mute`` decorator to suppress stdout with no return value.
@@ -54,7 +80,7 @@ Changes
 
 1.1.4
 =====
-:release-date: 2016-05-12 03:04 P.M PDT
+:release-date: 2016-05-12 03:04 p.m. PDT
 :release-by: Ask Solem
 
 - ``case.patch.*`` functions now supports using ``new`` as a positional
@@ -64,7 +90,7 @@ Changes
 
 1.1.3
 =====
-:release-date: 2016-04-19 04:41 P.M PDT
+:release-date: 2016-04-19 04:41 p.m. PDT
 :release-by: Ask Solem
 
 - ``case.patch(autospec=True)`` now works.
@@ -75,7 +101,7 @@ Changes
 
 1.1.2
 =====
-:release-date: 2016-04-08 11:34 P.M PDT
+:release-date: 2016-04-08 11:34 p.m. PDT
 :release-by: Ask Solem
 
 - Also :func:`case.patch.multiple`, and :func:`case.patch.object`
@@ -85,7 +111,7 @@ Changes
 
 1.1.1
 =====
-:release-date: 2016-04-08 11:13 P.M PDT
+:release-date: 2016-04-08 11:13 p.m. PDT
 :release-by: Ask Solem
 
 - :func:`case.patch` now gives :class:`case.MagicMock` (not
@@ -95,7 +121,7 @@ Changes
 
 1.1.0
 =====
-:release-date: 2016-04-08 10:00 P.M PDT
+:release-date: 2016-04-08 10:00 p.m. PDT
 :release-by: Ask Solem
 
 - Adds new Mock methods from Python 3.6:
@@ -124,7 +150,7 @@ Changes
 
 1.0.3
 =====
-:release-date: 2016-04-06 04:00 P.M PDT
+:release-date: 2016-04-06 04:00 p.m. PDT
 :release-by: Ask Solem
 
 - Python 2.6 compatibility.
@@ -135,7 +161,7 @@ Changes
 
 1.0.2
 =====
-:release-date: 2016-04-06 03:46 P.M PDT
+:release-date: 2016-04-06 03:46 p.m. PDT
 :release-by: Ask Solem
 
 - Adds docstrings
@@ -144,7 +170,7 @@ Changes
 
 1.0.1
 =====
-:release-date: 2016-04-05 04:00 P.M PDT
+:release-date: 2016-04-05 04:00 p.m. PDT
 :release-by: Ask Solem
 
 - Fixed issues with Python 3
@@ -153,7 +179,7 @@ Changes
 
 1.0.0
 =====
-:release-date: 2016-04-05 02:00 P.M PDT
+:release-date: 2016-04-05 02:00 p.m. PDT
 :release-by: Ask Solem
 
 - Initial release
