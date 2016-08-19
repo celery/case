@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+import setuptools
 
 import os
 import re
@@ -12,8 +12,6 @@ if sys.version_info < (2, 6):
     raise Exception('case requires Python 2.6 or higher.')
 
 NAME = 'case'
-entrypoints = {}
-extra = {}
 
 # -*- Classifiers -*-
 
@@ -113,7 +111,7 @@ else:
 
 # -*- %%% -*-
 
-setup(
+setuptools.setup(
     name=NAME,
     version=meta['version'],
     description=meta['doc'],
@@ -122,12 +120,16 @@ setup(
     url=meta['homepage'],
     platforms=['any'],
     license='BSD',
-    packages=find_packages(exclude=['ez_setup', 'tests', 'tests.*']),
     zip_safe=False,
     install_requires=install_requires,
     tests_require=tests_require,
     test_suite='nose.collector',
     classifiers=classifiers,
-    entry_points=entrypoints,
     long_description=long_description,
-    **extra)
+    entry_points={
+        'pytest11': ['case = case.pytest'],
+    },
+    packages=setuptools.find_packages(
+        exclude=['ez_setup', 'tests', 'tests.*'],
+    ),
+)
