@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import pytest
+import sys
 
 from six import iteritems as items
 
@@ -11,8 +12,12 @@ sentinel = object()
 
 class _patching(object):
 
-    def __init__(self, monkeypatch):
+    def __init__(self, monkeypatch, request):
         self.monkeypatch = monkeypatch
+        self.request = request
+
+    def __getattr__(self, name):
+        return getattr(self.monkeypatch, name)
 
     def __call__(self, path, value=sentinel, name=None,
                  new=mock.MagicMock, **kwargs):
@@ -39,9 +44,28 @@ class _patching(object):
         self.monkeypatch.setitem(dic, name, value)
         return value
 
+    def modules(self, *mods):
+        modules = []
+        for mod in mods:
+            mod = mod.split('.')
+            modules.extend(reversed([
+                '.'.join(mod[:-i] if i else mod) for i in range(len(mod))
+            ]))
+        modules = sorted(set(modules))
+        return _wrap_context(mock.module(*modules), self.request)
+
+
+def _wrap_context(context, request):
+    ret = context.__enter__()
+
+    def fin():
+        context.__exit__(*sys.exc_info())
+    request.addfinalizer(fin)
+    return ret
+
 
 @pytest.fixture()
-def patching(monkeypatch):
+def patching(monkeypatch, request):
     """Monkeypath.setattr shortcut.
 
     Example:
@@ -57,4 +81,16 @@ def patching(monkeypatch):
             # val will be of type mock.MagicMock by default
             val = patching.setitem('path.to.dict', 'KEY')
     """
-    return _patching(monkeypatch)
+    return _patching(monkeypatch, request)
+
+
+class _stdouts(object):
+
+    def __init__(self, stdout, stderr):
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+@pytest.fixture()
+def stdouts(request):
+    return _stdouts(*_wrap_context(mock.stdouts(), request))
