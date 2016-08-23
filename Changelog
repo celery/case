@@ -1,6 +1,46 @@
 Changes
 =======
 
+.. _version-1.3.1:
+
+1.3.1
+=====
+:release-date: 2016-07-22 06:14 p.m. PDT
+:release-by: Ask Solem
+
+- All case decorators now works with py.test classes.
+
+- Py.test: Adds new `stdouts` fixture that patches :data:`sys.stdout`,
+  and :data:`sys.stderr`.
+
+    Example:
+
+        .. code-block:: python
+
+            def test_x(stdouts):
+                print('foo')
+                assert 'foo' in stdouts.stdout.getvalue()
+                print('bar', file=sys.stderr)
+                assert 'bar' in stdouts.stderr.getvalue()
+
+- Py.test: The `patching` fixture can now mock modules.
+
+    Example:
+
+        .. code-block:: python
+
+            def test_x(patching):
+                gevent, gevent_monkey = patching.modules(
+                    'gevent',
+                    'gevent.monkey',
+                )
+                os = patching.modules('os')
+                gevent_monkey.patch_all.side_effect = RuntimeError()
+
+                with pytest.raises(RuntimeError):
+                    from gevent import monkey
+                    monkey.patch_all()
+
 .. _version-1.3.0:
 
 1.3.0
@@ -8,7 +48,7 @@ Changes
 :release-date: 2016-07-18 05:33 p.m. PDT
 :release-by: Ask Solem
 
-- Case is now a py.test plugin and provides a `patching` fixture
+- Case is now a py.test plug-in and provides a `patching` fixture
   as a shortcut to `monkeypatch` setting the value to a mock.
 
     This does not have any effects for users not using py.test.
