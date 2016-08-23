@@ -11,7 +11,7 @@ from .mock import ANY, ContextMock, MagicMock, Mock, call, patch, sentinel
 from . import mock
 from . import skip
 
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 __author__ = 'Ask Solem'
 __contact__ = 'ask@celeryproject.org'
 __homepage__ = 'http://github.com/celery/case'
