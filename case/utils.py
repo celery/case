@@ -6,6 +6,7 @@ import inspect
 import io
 import logging
 import sys
+import unittest
 
 from contextlib import contextmanager
 from six import reraise, string_types
@@ -53,6 +54,51 @@ class _CallableContext(object):
             return self.ctx.__exit__(*einfo)
 
 
+def is_unittest_testcase(cls):
+    try:
+        mro = cls.mro
+    except AttributeError:
+        pass  # py.test uses old style classes
+    else:
+        for parent in mro():
+            if issubclass(parent, unittest.TestCase):
+                return True
+
+
+def augment_setup(orig_setup, context, pargs, pkwargs):
+    def around_setup_method(*args, **kwargs):
+        try:
+            contexts = args[0].__rb3dc_contexts__
+        except AttributeError:
+            contexts = args[0].__rb3dc_contexts = []
+        p = context(*pargs, **pkwargs)
+        p.__enter__()
+        contexts.append(p)
+        if orig_setup:
+            return orig_setup(*args, **kwargs)
+    if orig_setup:
+        around_setup_method = wraps(orig_setup)(around_setup_method)
+        around_setup_method.__wrapped__ = orig_setup
+    return around_setup_method
+
+
+def augment_teardown(orig_teardown, context, pargs, pkwargs):
+    def around_teardown(*args, **kwargs):
+        try:
+            contexts = args[0].__rb3dc_contexts__
+        except AttributeError:
+            pass
+        else:
+            for context in contexts:
+                context.__exit__(*sys.exc_info())
+        if orig_teardown:
+            orig_teardown(*args, **kwargs)
+    if orig_teardown:
+        around_teardown = wraps(orig_teardown)(around_teardown)
+        around_teardown.__wrapped__ = orig_teardown
+    return around_teardown
+
+
 def decorator(predicate):
     context = contextmanager(predicate)
 
@@ -62,35 +108,20 @@ def decorator(predicate):
         @wraps(predicate)
         def decorator(cls):
             if inspect.isclass(cls):
-                orig_setup = cls.setUp
-                orig_teardown = cls.tearDown
-
-                @wraps(cls.setUp)
-                def around_setup(*args, **kwargs):
-                    try:
-                        contexts = args[0].__rb3dc_contexts__
-                    except AttributeError:
-                        contexts = args[0].__rb3dc_contexts__ = []
-                    p = context(*pargs, **pkwargs)
-                    p.__enter__()
-                    contexts.append(p)
-                    return orig_setup(*args, **kwargs)
-                around_setup.__wrapped__ = cls.setUp
-                cls.setUp = around_setup
-
-                @wraps(cls.tearDown)
-                def around_teardown(*args, **kwargs):
-                    try:
-                        contexts = args[0].__rb3dc_contexts__
-                    except AttributeError:
-                        pass
-                    else:
-                        for context in contexts:
-                            context.__exit__(*sys.exc_info())
-                    orig_teardown(*args, **kwargs)
-                around_teardown.__wrapped__ = cls.tearDown
-                cls.tearDown = around_teardown
-
+                if is_unittest_testcase(cls):
+                    orig_setup = cls.setUp
+                    orig_teardown = cls.tearDown
+                    cls.setUp = augment_setup(
+                        orig_setup, context, pargs, pkwargs)
+                    cls.tearDown = augment_teardown(
+                        orig_teardown, context, pargs, pkwargs)
+                else:  # py.test
+                    orig_setup = getattr(cls, 'setup_method', None)
+                    orig_teardown = getattr(cls, 'teardown_method', None)
+                    cls.setup_method = augment_setup(
+                        orig_setup, context, pargs, pkwargs)
+                    cls.teardown_method = augment_teardown(
+                        orig_teardown, context, pargs, pkwargs)
                 return cls
             else:
                 @wraps(cls)
