@@ -14,4 +14,5 @@
     case.case
     case.skip
     case.mock
+    case.pytest
     case.utils

@@ -1,11 +1,11 @@
 =====================================================
- ``case.mock``
+ ``case.pytest``
 =====================================================
 
 .. contents::
     :local:
-.. currentmodule:: case.mock
+.. currentmodule:: case.pytest
 
-.. automodule:: case.mock
+.. automodule:: case.pytest
     :members:
     :undoc-members:
