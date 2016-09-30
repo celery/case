@@ -3,11 +3,47 @@ from __future__ import absolute_import, unicode_literals
 import pytest
 import sys
 
+from functools import partial, wraps
 from six import iteritems as items
 
 from . import mock
 
 sentinel = object()
+
+
+class fixture_with_options(object):
+    """Pytest fixture with options specified in separate decrorator.
+
+    The decorated fixture MUST take the request fixture as first argument,
+    but is free to use other fixtures.
+
+    Example:
+        @fixture_with_options()
+        def sftp(request,
+                 username='test_username',
+                 password='test_password'):
+            return {'username': username, 'password': password}
+
+        @sftp.options(username='foo', password='bar')
+        def test_foo(sftp):
+            assert sftp['username'] == 'foo'
+            assert sftp['password'] == 'bar'
+    """
+
+    def __init__(self, marker_name=None):
+        self.marker_name = marker_name
+
+    def __call__(self, fun):
+        marker_name = self.marker_name or fun.__name__
+
+        @pytest.fixture()
+        @wraps(fun)
+        def _inner(request, *args, **kwargs):
+            marker = request.node.get_marker(marker_name)
+            return fun(request, *args, **dict(marker.kwargs, **kwargs))
+        _inner.options = partial(getattr(pytest.mark, marker_name))
+        _inner.__wrapped__ = fun
+        return _inner
 
 
 class _patching(object):
