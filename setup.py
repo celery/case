@@ -115,6 +115,7 @@ setuptools.setup(
     name=NAME,
     version=meta['version'],
     description=meta['doc'],
+    keywords='test unit testing pytest unittest mock patch',
     author=meta['author'],
     author_email=meta['contact'],
     url=meta['homepage'],
