@@ -122,7 +122,7 @@ class MockMixin(object):
         for key, value in items(attrs):
             setattr(self, key, value)
 
-    def assert_not_called(_mock_self):
+    def assert_not_called(_mock_self):  # noqa
         """assert that the mock was never called."""
         self = _mock_self
         if self.call_count != 0:
@@ -130,7 +130,7 @@ class MockMixin(object):
                    (self._mock_name or 'mock', self.call_count))
             raise AssertionError(msg)
 
-    def assert_called(_mock_self):
+    def assert_called(_mock_self):  # noqa
         """assert that the mock was called at least once."""
         self = _mock_self
         if self.call_count == 0:
@@ -138,7 +138,7 @@ class MockMixin(object):
                    self._mock_name or 'mock')
             raise AssertionError(msg)
 
-    def assert_called_once(_mock_self):
+    def assert_called_once(_mock_self):  # noqa
         """assert that the mock was called only once."""
         self = _mock_self
         if not self.call_count == 1:
