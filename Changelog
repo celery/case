@@ -1,6 +1,30 @@
 Changes
 =======
 
+.. _version-1.4.0:
+
+1.4.0
+=====
+:release-date: 2016-10-17 06:14 p.m. PDT
+:release-by: Ask Solem
+
+- Adds new helper: ``case.pytest.fixture_with_options``.
+
+    Example:
+
+    .. code-block:: python
+
+        @fixture_with_options()
+        def sftp(request,
+                 username='test_username',
+                 password='test_password'):
+            return {'username': username, 'password': password}
+
+        @sftp.options(username='foo', password='bar')
+        def test_foo(sftp):
+            assert sftp['username'] == 'foo'
+            assert sftp['password'] == 'bar'
+
 .. _version-1.3.1:
 
 1.3.1
