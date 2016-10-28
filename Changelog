@@ -1,6 +1,20 @@
 Changes
 =======
 
+1.5.2
+=====
+:release-date: 2016-10-28 03:40 p.m. PDT
+:release-by: Ask Solem
+
+- Using setup/teardown instead of setup_method/teardown_method was a bad idea.
+
+    Since it's way more common to override setup/teardown, and it's
+    likely people forget to call super in these methods, the change
+    crashed several test suites.
+
+    So on pytest the decorators are now back to augmenting
+    setup_method/teardown_method again.
+
 1.5.1
 =====
 :release-date: 2016-10-28 03:40 p.m. PDT
