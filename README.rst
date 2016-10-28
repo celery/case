@@ -4,7 +4,7 @@
 
 |build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
 
-:Version: 1.4.0
+:Version: 1.5.0
 :Web: http://case.readthedocs.org/
 :Download: http://pypi.python.org/pypi/case/
 :Source: http://github.com/celery/case/
