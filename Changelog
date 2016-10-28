@@ -1,6 +1,37 @@
 Changes
 =======
 
+.. _version-1.5.0:
+
+1.5.0
+=====
+:release-date: 2016-10-28 03:36 p.m. PDT
+:release-by: Ask Solem
+
+- Pytest: When decorating classes using the ``skip.*`` and ``mock.*``
+  decorators, these now augment ``cls.setup``/``cls.teardown`` instead of
+  ``cls.setup_method``/``cls.teardown_method``.
+
+    It's a bit hard to find in the pytest documentation, but pytest
+    will always call test_cls.setup and test_cls.teardown.
+
+- Pytest: Adds ``patching.object``.
+
+    This works exactly like :func:`unittest.mock.patch.object`,
+    you give it an object and an attribute name, and it will patch
+    that attribute on the object.  It also supports the same arguments
+    and extra options.
+
+    Example:
+
+    .. code-block:: python
+
+        @pytest.fixture
+        def channel(patching):
+            c = Channel()
+            patching(c, 'connect')
+            return c
+
 .. _version-1.4.0:
 
 1.4.0
