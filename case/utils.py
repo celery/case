@@ -114,8 +114,8 @@ def decorator(predicate):
                     cls.tearDown = augment_teardown(
                         orig_teardown, context, pargs, pkwargs)
                 else:  # py.test
-                    orig_setup = getattr(cls, 'setup', None)
-                    orig_teardown = getattr(cls, 'teardown', None)
+                    orig_setup = getattr(cls, 'setup_method', None)
+                    orig_teardown = getattr(cls, 'teardown_method', None)
                     cls.setup_method = augment_setup(
                         orig_setup, context, pargs, pkwargs)
                     cls.teardown_method = augment_teardown(
