@@ -6,6 +6,7 @@ import sys
 from functools import partial, wraps
 from six import iteritems as items
 
+from . import patch
 from . import mock
 
 sentinel = object()
@@ -60,6 +61,11 @@ class _patching(object):
         value = self._value_or_mock(value, new, name, path, **kwargs)
         self.monkeypatch.setattr(path, value)
         return value
+
+    def object(self, target, attribute, *args, **kwargs):
+        return _wrap_context(
+            patch.object(target, attribute, *args, **kwargs),
+            self.request)
 
     def _value_or_mock(self, value, new, name, path, **kwargs):
         if value is sentinel:
