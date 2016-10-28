@@ -56,7 +56,7 @@ class _CallableContext(object):
 
 def is_unittest_testcase(cls):
     try:
-        mro = cls.mro
+        cls.mro
     except AttributeError:
         pass  # py.test uses old style classes
     else:
