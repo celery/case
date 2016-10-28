@@ -73,7 +73,6 @@ def augment_setup(orig_setup, context, pargs, pkwargs):
         p.__enter__()
         contexts.append(p)
         if orig_setup:
-            print('CALLING ORIG SETUP: %r %r %r' % (orig_setup, args, kwargs))
             return orig_setup(self, *args, **kwargs)
     if orig_setup:
         around_setup_method = wraps(orig_setup)(around_setup_method)
