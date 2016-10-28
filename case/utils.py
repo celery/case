@@ -60,22 +60,21 @@ def is_unittest_testcase(cls):
     except AttributeError:
         pass  # py.test uses old style classes
     else:
-        for parent in mro():
-            if issubclass(parent, unittest.TestCase):
-                return True
+        return issubclass(cls, unittest.TestCase)
 
 
 def augment_setup(orig_setup, context, pargs, pkwargs):
-    def around_setup_method(*args, **kwargs):
+    def around_setup_method(self, *args, **kwargs):
         try:
-            contexts = args[0].__rb3dc_contexts__
+            contexts = self.__rb3dc_contexts__
         except AttributeError:
-            contexts = args[0].__rb3dc_contexts = []
+            contexts = self.__rb3dc_contexts = []
         p = context(*pargs, **pkwargs)
         p.__enter__()
         contexts.append(p)
         if orig_setup:
-            return orig_setup(*args, **kwargs)
+            print('CALLING ORIG SETUP: %r %r %r' % (orig_setup, args, kwargs))
+            return orig_setup(self, *args, **kwargs)
     if orig_setup:
         around_setup_method = wraps(orig_setup)(around_setup_method)
         around_setup_method.__wrapped__ = orig_setup
@@ -83,16 +82,16 @@ def augment_setup(orig_setup, context, pargs, pkwargs):
 
 
 def augment_teardown(orig_teardown, context, pargs, pkwargs):
-    def around_teardown(*args, **kwargs):
+    def around_teardown(self, *args, **kwargs):
         try:
-            contexts = args[0].__rb3dc_contexts__
+            contexts = self.__rb3dc_contexts__
         except AttributeError:
             pass
         else:
             for context in contexts:
                 context.__exit__(*sys.exc_info())
         if orig_teardown:
-            orig_teardown(*args, **kwargs)
+            orig_teardown(self, *args, **kwargs)
     if orig_teardown:
         around_teardown = wraps(orig_teardown)(around_teardown)
         around_teardown.__wrapped__ = orig_teardown
@@ -116,8 +115,8 @@ def decorator(predicate):
                     cls.tearDown = augment_teardown(
                         orig_teardown, context, pargs, pkwargs)
                 else:  # py.test
-                    orig_setup = getattr(cls, 'setup_method', None)
-                    orig_teardown = getattr(cls, 'teardown_method', None)
+                    orig_setup = getattr(cls, 'setup', None)
+                    orig_teardown = getattr(cls, 'teardown', None)
                     cls.setup_method = augment_setup(
                         orig_setup, context, pargs, pkwargs)
                     cls.teardown_method = augment_teardown(
