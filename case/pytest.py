@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import pytest
 import sys
 
-from functools import partial, wraps
+from functools import wraps
 from six import iteritems as items
 
 from . import patch
@@ -41,8 +41,13 @@ class fixture_with_options(object):
         @wraps(fun)
         def _inner(request, *args, **kwargs):
             marker = request.node.get_marker(marker_name)
+            print(request.node)
             return fun(request, *args, **dict(marker.kwargs, **kwargs))
-        _inner.options = partial(getattr(pytest.mark, marker_name))
+
+        def options(*args, **kwargs):
+            return getattr(pytest.mark, marker_name)(*args, **kwargs)
+
+        _inner.options = options
         _inner.__wrapped__ = fun
         return _inner
 

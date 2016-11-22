@@ -211,6 +211,8 @@ def _create_patcher(fun, signature):
         return fun(*args, **kwargs)
 
     return patcher
+
+
 patch = _create_patcher(mock.patch, _patch_sig1)
 patch.dict = mock.patch.dict
 patch.multiple = _create_patcher(mock.patch.multiple, _patch_sig2)
