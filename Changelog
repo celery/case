@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.5.3
+=====
+:release-date: 2017-02-22 03:26 p.m PST
+:release-by: Ask Solem
+
+- ``patch.multiple`` now works.
+
 1.5.2
 =====
 :release-date: 2016-10-28 03:40 p.m. PDT
