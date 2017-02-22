@@ -201,6 +201,13 @@ def _patch_sig2(target, attribute,
     return new, autospec, new_callable
 
 
+def _patch_sig_multiple(target,
+                        spec=None, create=False, spec_set=None,
+                        autospec=None, new_callable=None, **kwargs):
+    # New is always set, don't have to specify new_callable
+    return True, autospec, new_callable
+
+
 def _create_patcher(fun, signature):
 
     @wraps(fun)
@@ -215,7 +222,7 @@ def _create_patcher(fun, signature):
 
 patch = _create_patcher(mock.patch, _patch_sig1)
 patch.dict = mock.patch.dict
-patch.multiple = _create_patcher(mock.patch.multiple, _patch_sig2)
+patch.multiple = _create_patcher(mock.patch.multiple, _patch_sig_multiple)
 patch.object = _create_patcher(mock.patch.object, _patch_sig2)
 patch.stopall = mock.patch.stopall
 patch.TEST_PREFIX = mock.patch.TEST_PREFIX
