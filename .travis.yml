@@ -21,6 +21,8 @@ env:
     - TOXENV=flake8
     - TOXENV=flakeplus
     - TOXENV=apicheck
+before_install:
+  - sudo apt-get -y install python  
 install: travis_retry pip install -U tox
 script: tox -v -- -v
 after_success:
