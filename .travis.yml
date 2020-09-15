@@ -1,8 +1,12 @@
-language: python
+https://github.com/genisysram/case.gitlanguage: python
 sudo: false
 cache: false
 python:
     - '3.5'
+os: linux
+arch:
+  - ppc64le
+  - amd64
 env:
   global:
     PYTHONUNBUFFERED=yes
