@@ -3,10 +3,6 @@ sudo: false
 cache: false
 python:
     - '3.5'
-os: linux
-arch:
-  - ppc64le
-  - amd64
 env:
   global:
     PYTHONUNBUFFERED=yes
@@ -21,6 +17,28 @@ env:
     - TOXENV=flake8
     - TOXENV=flakeplus
     - TOXENV=apicheck
+    
+    #script to run on powersystems
+    - TOXENV=2.6
+      arch: ppc64le
+    - TOXENV=2.7
+      arch: ppc64le
+    - TOXENV=3.3
+      arch: ppc64le
+    - TOXENV=3.4
+      arch: ppc64le
+    - TOXENV=3.4
+      arch: ppc64le
+    - TOXENV=pypy
+      arch: ppc64le
+    - TOXENV=3.5
+      arch: ppc64le
+    - TOXENV=flake8
+      arch: ppc64le
+    - TOXENV=flakeplus
+      arch: ppc64le
+    - TOXENV=apicheck
+      arch: ppc64le
 before_install:
   - sudo apt-get -y install python  
   - sudo apt-get install -y python-pip
