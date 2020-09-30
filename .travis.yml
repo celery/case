@@ -23,6 +23,7 @@ before_install:
   - |
      if [[ "$TRAVIS_CPU_ARCH" == "ppc64le" ]]; then
        sudo chown -Rv $USER:$GROUP ~/.cache/pip/wheels
+       /usr/local/lib/python3.5/dist-packages
      fi
   - sudo apt-get -y install python  
   - sudo apt-get install -y python-pip
