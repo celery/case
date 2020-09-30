@@ -3,7 +3,6 @@ cache: false
 python:
     - '3.5'
 arch:
-  - amd64
   - ppc64le
 env:
   global:
@@ -20,11 +19,7 @@ env:
     - TOXENV=flakeplus
     - TOXENV=apicheck
 before_install:
-  - |
-     if [[ "$TRAVIS_CPU_ARCH" == "ppc64le" ]]; then
-       sudo chown -Rv $USER:$GROUP ~/.cache/pip/wheels
-       sudo chmod 777 /usr/local/lib/python3.5/dist-packages
-     fi
+ 
   - sudo apt-get -y install python  
   - sudo apt-get install -y python-pip
   - sudo apt-get install -y python3-pip
@@ -33,3 +28,12 @@ script: tox -v -- -v
 after_success:
   - .tox/$TRAVIS_PYTHON_VERSION/bin/coverage xml
   - .tox/$TRAVIS_PYTHON_VERSION/bin/codecov -e TOXENV
+jobs: 
+  exclude:
+    - TOXENV=3.3
+    - TOXENV=3.4
+    - TOXENV=pypy
+    - TOXENV=flake8
+    - TOXENV=flakeplus
+    - TOXENV=apicheck
+
