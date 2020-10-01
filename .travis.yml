@@ -18,6 +18,17 @@ env:
     - TOXENV=flake8
     - TOXENV=flakeplus
     - TOXENV=apicheck
+# Disable version 3.3, 3.2 & pypy
+jobs: 
+  exclude:
+    - TOXENV=2.6
+    - TOXENV=3.3
+    - TOXENV=3.4
+    - TOXENV=pypy
+    - TOXENV=flake8
+    - TOXENV=flakeplus
+    - TOXENV=apicheck  
+    
 before_install:
  
   - sudo apt-get -y install python  
