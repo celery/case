@@ -3,7 +3,8 @@ cache: false
 python:
     - '3.5'
 arch:
-  - ppc64le
+   - amd64 
+   - ppc64le
 env:
   global:
     PYTHONUNBUFFERED=yes
