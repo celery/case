@@ -23,13 +23,29 @@ env:
 # Disable version 3.3, 3.2 & pypy
 jobs: 
   exclude:
-    - TOXENV=2.6
+    - TOXENV=2.6    
     - TOXENV=3.3
     - TOXENV=3.4
     - TOXENV=pypy
     - TOXENV=flake8
     - TOXENV=flakeplus
     - TOXENV=apicheck  
+#adding code to exclude jobs of ppc64le
+    - arch: ppc64le 
+       TOXENV=2.6        
+    - arch: ppc64le
+       TOXENV=3.3
+    - arch: ppc64le
+       TOXENV=3.4
+    - arch: ppc64le
+       TOXENV=pypy
+    - arch: ppc64le
+       TOXENV=flake8
+    - arch: ppc64le
+       TOXENV=flakeplus
+    - arch: ppc64le 
+       TOXENV=apicheck    
+    
     
 before_install:
  
@@ -41,12 +57,4 @@ script: tox -v -- -v
 after_success:
   - .tox/$TRAVIS_PYTHON_VERSION/bin/coverage xml
   - .tox/$TRAVIS_PYTHON_VERSION/bin/codecov -e TOXENV
-jobs: 
-  exclude:
-    - TOXENV=3.3
-    - TOXENV=3.4
-    - TOXENV=pypy
-    - TOXENV=flake8
-    - TOXENV=flakeplus
-    - TOXENV=apicheck
 
