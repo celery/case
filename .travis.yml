@@ -1,8 +1,11 @@
-language: python
 sudo: false
 cache: false
+language: python
 python:
     - '3.5'
+arch:
+   - amd64 
+   - ppc64le
 env:
   global:
     PYTHONUNBUFFERED=yes
@@ -17,8 +20,49 @@ env:
     - TOXENV=flake8
     - TOXENV=flakeplus
     - TOXENV=apicheck
+# Disable version 3.3, 3.2 & pypy
+jobs: 
+  exclude:
+    - TOXENV=2.6    
+    - TOXENV=3.3
+    - TOXENV=3.4
+    - TOXENV=pypy
+    - TOXENV=flake8
+    - TOXENV=flakeplus
+    - TOXENV=apicheck  
+#adding code to exclude jobs of ppc64le
+    - env: TOXENV=2.6
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=3.3
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=3.4
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=pypy
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=flake8
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=flakeplus
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=apicheck
+      python: "3.5"
+      arch: ppc64le
+
+
+    
+before_install:
+ 
+  - sudo apt-get -y install python  
+  - sudo apt-get install -y python-pip
+  - sudo apt-get install -y python3-pip
 install: travis_retry pip install -U tox
 script: tox -v -- -v
 after_success:
   - .tox/$TRAVIS_PYTHON_VERSION/bin/coverage xml
   - .tox/$TRAVIS_PYTHON_VERSION/bin/codecov -e TOXENV
+
