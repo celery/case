@@ -31,28 +31,29 @@ jobs:
     - TOXENV=flakeplus
     - TOXENV=apicheck  
 #adding code to exclude jobs of ppc64le
-    - arch: ppc64le 
-       TOXENV=2.6  
-      python: "3.5"      
-    - arch: ppc64le
-       TOXENV=3.3
+    - env: TOXENV=2.6
       python: "3.5"
-    - arch: ppc64le
-       TOXENV=3.4
+      arch: ppc64le
+    - env: TOXENV=3.3
       python: "3.5"
-    - arch: ppc64le      
-       TOXENV=pypy
+      arch: ppc64le
+    - env: TOXENV=3.4
       python: "3.5"
-    - arch: ppc64le      
-       TOXENV=flake8
+      arch: ppc64le
+    - env: TOXENV=pypy
       python: "3.5"
-    - arch: ppc64le
-       TOXENV=flakeplus
+      arch: ppc64le
+    - env: TOXENV=flake8
       python: "3.5"
-    - arch: ppc64le 
-       TOXENV=apicheck  
-      python: "3.5"  
-    
+      arch: ppc64le
+    - env: TOXENV=flakeplus
+      python: "3.5"
+      arch: ppc64le
+    - env: TOXENV=apicheck
+      python: "3.5"
+      arch: ppc64le
+
+
     
 before_install:
  
